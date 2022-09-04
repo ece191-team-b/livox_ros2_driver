@@ -67,7 +67,7 @@ source ./install/setup.sh
 ### 3.1 Use the ROS2 launch file to load livox_ros2_driver
 
 The usual format of the launch file is: `ros2 launch [package_name] [launch_file_name]`.
-Therefore, to launch the livox_ros2_driver, you can use the following command:
+Therefore, to launch the livox_ros2_driver and have it publish livox's custom pointcloud message, you can use the following command:
 
 ```bash
 ros2 launch livox_ros2_driver livox_lidar_msg_launch.py
@@ -84,7 +84,7 @@ There are multiple launch files provided as an example. Primarily, there are two
 
 We are using a livox converter and livox's custom lidar data, so we will use lidar connection mode and the `msg_launch` variant of the launch files. The usual launch file to use is `livox_lidar_msg_launch.py`.
 
-However, if you would like to visualize the pointcloud in rviz, you can use the `livox_lidar_rviz_launch.py` launch file. This launch file will launch the livox_ros2_driver and rviz.
+However, if you would like to visualize the pointcloud in rviz, you can use the `livox_lidar_rviz_launch.py` launch file. This will launch the livox_ros2_driver and rviz.
 
 ### 3.3 ROS2 launch loads livox_ros2_driver precautions
 
@@ -107,7 +107,7 @@ Note: The X in the figure above corresponds to 1 in MID-100_Left/MID-40/Horizon/
 
 ### 4.1 Launch file configuration instructions
 
-All launch files of livox_ros2_driver are in the "~/livox_ros2_driver/launch" directory. Different launch files have different configuration parameter values and are used in different scenarios :
+All launch files of livox_ros2_driver are in the `~/livox_ros2_driver/livox_ros2_driver/launch` directory. Different launch files have different configuration parameter values and are used in different scenarios :
 
 | launch file name          | Description                                                  |
 | ------------------------- | ------------------------------------------------------------ |
@@ -123,7 +123,7 @@ All launch files of livox_ros2_driver are in the "~/livox_ros2_driver/launch" di
 **IMPORTANT**
 The default values of the parameters might not be what is actually provided in this repo. In particular, `livox_lidar_msg_launch.py` and `livox_lidar_rviz_launch.py` have different values than the Livox default values. The default values in this repo are the values that we have found to work best for our use case.
 
-`multi_topic` will be an important parameter to set if you are using more than one lidar. One thing to note is that when this parameter is set to `1`, the livox will publish data to multiple topics with the format `livox/lidar{lidar_id}` (lidar_id can be found on the lidar itself). When this parameter is set to `0`, the livox will publish data to the topic named `/livox/lidar`.
+`multi_topic` will be an important parameter to set if you are using more than one lidar. One thing to note is that when this parameter is set to `1`, the livox will publish data to multiple topics with the format `livox/lidar_{lidar_id}` (lidar_id can be found on the lidar itself). When this parameter is set to `0`, the livox will publish data to the topic named `/livox/lidar`.
 
 You would need to modify the launch files of the nodes that subscribe to the livox data to match the topic name that the livox is publishing to.
 
@@ -178,7 +178,7 @@ uint8 line              # laser number in lidar
 
 ## 5. Configure LiDAR parameters
 
-In the "~/livox_ros2_driver/launch" path, there are two json files, `livox_hub_config.json` and `livox_lidar_config.json`.
+In the `~/livox_ros2_driver/livox_ros2_driver/launch` path, there are two json files, `livox_hub_config.json` and `livox_lidar_config.json`.
 
 1. When connecting directly to LiDAR, use the `livox_lidar_config.json` file to configure LiDAR parameters. Examples of file contents are as follows :
 
