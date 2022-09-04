@@ -1,91 +1,99 @@
 # Livox ROS2 Driver
 
-The Livox ROS2 driver is a driver package based on ROS2, specifically used to connect LiDAR products produced by Livox. The driver is recommended to run on ROS2 foxy. It is also tested on ROS2 galactic with the perception pipeline.
+The Livox ROS2 driver is a driver package based on ROS2, specifically used to connect LiDAR products produced by Livox. This is a fork of the [Offical Livox ROS2 driver](https://github.com/Livox-SDK/livox_ros2_driver). Some changes are made to the original driver to make it work with our perception pipeline. If you stumbled upon this repository, you are probably looking for the [original driver](https://github.com/Livox-SDK/livox_ros2_driver).
 
-## 0. Version and Release History
-
-### 0.1 Current Version
-
-[v0.0.1-beta](https://github.com/Livox-SDK/livox_ros2_driver/releases/tag/v0.0.1-beta)
-
-### 0.2 Release History
-
-[Release History](https://github.com/Livox-SDK/livox_ros2_driver/releases/tag/v0.0.1-beta)
+- [Livox ROS2 Driver](#livox-ros2-driver)
+  - [1. Install dependencies](#1-install-dependencies)
+    - [1.1 ROS2 installation](#11-ros2-installation)
+    - [1.2 install colcon](#12-install-colcon)
+  - [2. Get and build livox_ros2_driver](#2-get-and-build-livox_ros2_driver)
+  - [3. Run livox_ros2_driver](#3-run-livox_ros2_driver)
+    - [3.1 Use the ROS2 launch file to load livox_ros2_driver](#31-use-the-ros2-launch-file-to-load-livox_ros2_driver)
+    - [3.2 ROS2 launch load command example](#32-ros2-launch-load-command-example)
+    - [3.3 ROS2 launch loads livox_ros2_driver precautions](#33-ros2-launch-loads-livox_ros2_driver-precautions)
+    - [3.4 Livox LiDAR Broadcast code introduction](#34-livox-lidar-broadcast-code-introduction)
+  - [4. Launch file and livox_ros2_driver internal parameter configuration instructions](#4-launch-file-and-livox_ros2_driver-internal-parameter-configuration-instructions)
+    - [4.1 Launch file configuration instructions](#41-launch-file-configuration-instructions)
+    - [4.2 Livox_ros2_driver internal main parameter configuration instructions](#42-livox_ros2_driver-internal-main-parameter-configuration-instructions)
+    - [4.3 Pointcloud data specification](#43-pointcloud-data-specification)
+  - [5. Configure LiDAR parameters](#5-configure-lidar-parameters)
+  - [6. livox_ros2_driver timestamp synchronization function](#6-livox_ros2_driver-timestamp-synchronization-function)
+    - [6.1 Hardware requirements](#61-hardware-requirements)
+    - [6.2 Enable timestamp synchronization](#62-enable-timestamp-synchronization)
+  - [7. Support](#7-support)
 
 ## 1. Install dependencies
 
-Before running Livox ROS2 driver under ubuntu18.04, ROS2 (dashing, ubuntu18.04), colcon build tool and Livox-SDK must be installed.
+Before running Livox ROS2 driver under ubuntu 20.04, ROS2 (galactic), colcon build tool and Livox-SDK must be installed.
 
 ### 1.1 ROS2 installation
 
-For ROS2 installation, please refer to the ROS2 installation guide :
+For ROS2 installation, please refer to the [Offical ROS2 installation guide](https://index.ros.org/doc/ros2/Installation/Galactic/Linux-Install-Debians/)
 
-[ROS2 installation guide](https://index.ros.org/doc/ros2/Installation/Dashing/Linux-Install-Debians/)
+Somethings to note:
 
-&ensp;&ensp;&ensp;&ensp;***Note :***
-
-&ensp;&ensp;&ensp;&ensp;（1）Be sure to install the desktop version of ROS2 (ros-dashing-desktop);
-
-&ensp;&ensp;&ensp;&ensp;（2）After installing ROS2 dashing, please follow the installation guide to configure the system environment;
+1. Be sure to install the ROS2 galactic version (other versions are may not be supported)
+2. Follow the instructions for configuring your environment. You will need to source ROS by using the command `/opt/ros/galactic/setup.bash` file every time you open a new terminal.
 
 ### 1.2 install colcon
 
-Please refer to the following link for colcon installation：
-
-[colcon installation](https://index.ros.org/doc/ros2/Tutorials/Colcon-Tutorial/#install-colcon)
+Colcon is a tool for building and testing ROS2 packages. It is used to build the livox_ros2_driver package. For installation instructions, please refer to the [offical colcon installation guide](https://colcon.readthedocs.io/en/released/user/installation.html)
 
 ## 2. Get and build livox_ros2_driver
 
-1. Get livox_ross_driver from GitHub :
+Get livox_ros2_driver from GitHub :
 
-   `git clone https://github.com/Livox-SDK/livox_ros2_driver.git ws_livox/src`
+```bash
+cd ~
+git clone https://github.com/ece191-team-b/livox_ros2_driver.git
+```
 
-&ensp;&ensp;&ensp;&ensp;***Note :***
+Build livox_ros2_driver :
 
-&ensp;&ensp;&ensp;&ensp;Be sure to use the above command to clone the code to the local, otherwise it will compile error due to the file path problem.
+```bash
+cd ~/livox_ros2_driver
+colcon build
+```
 
-2. Use the following command to build livox_ros2_driver :
+Source the livox_ros2_driver environment :
 
-   ```bash
-   cd ws_livox
-   colcon build
-   ```
-
-3. Source the environment
-
-   `source ./install/setup.sh`
+```bash
+cd ~/livox_ros2_driver
+source ./install/setup.sh
+```
 
 ## 3. Run livox_ros2_driver
 
 ### 3.1 Use the ROS2 launch file to load livox_ros2_driver
 
-   Before using the launch file to load livox_ros2_driver, first enter the directory where the launch file is located, the command is as follows：
+The usual format of the launch file is: `ros2 launch [package_name] [launch_file_name]`.
+Therefore, to launch the livox_ros2_driver, you can use the following command:
 
-   `cd ./src/livox_ros2_driver/launch`
-
-   The command format for loading livox_ros2_driver using the launch file is as follows：
-
-   `ros2 launch [launch file]`
+```bash
+ros2 launch livox_ros2_driver livox_lidar_msg_launch.py
+```
 
 ### 3.2 ROS2 launch load command example
 
-   In lidar connection mode, the commands to load livox_ros2_driver and rviz2 are as follows :
-   `ros2 launch livox_lidar_rviz_launch.py`
+There are multiple launch files provided as an example. Primarily, there are two variants of the launch file:
 
-   In hub connection mode, the commands to load livox_ros2_driver and rviz2 are as follows :
-   `ros2 launch livox_hub_rviz_launch.py`
+1. lidar connection mode
+   Usually the format of these launch files will be `livox_lidar_{launch-type}_launch.py`
+2. hub connection mode
+   Conversely, the format of these launch files will be `livox_hub_{launch-type}_launch.py`
+
+We are using a livox converter and livox's custom lidar data, so we will use lidar connection mode and the `msg_launch` variant of the launch files. The usual launch file to use is `livox_lidar_msg_launch.py`.
+
+However, if you would like to visualize the pointcloud in rviz, you can use the `livox_lidar_rviz_launch.py` launch file. This launch file will launch the livox_ros2_driver and rviz.
 
 ### 3.3 ROS2 launch loads livox_ros2_driver precautions
 
-1. The launch method of ros2 is completely different from that of ros1. The launch file of ros2 is actually a python script;
+1. The launch method of ros2 is completely different from that of ros1. The launch file of ros2 is actually a python script
+2. The ros2 driver no longer supports specifying the LiDAR device to be connected under the command line, and only supports configuring the corresponding LiDAR broadcast code and other parameters in the json configuration file
+3. When the connection status of the device specified in the configuration file is configured to enable connection (true), the livox_ros2_driver will only connect to the device specified in the configuration file
+4. When the connection status of the devices specified in the configuration file is **all** configured to prohibit connection (false), livox_ros2_driver **will automatically connect all the devices that are scanned**
 
-2. The ros2 driver no longer supports specifying the LiDAR device to be connected under the command line, and only supports configuring the corresponding LiDAR broadcast code and other parameters in the json configuration file;
-
-3. When the connection status of the device specified in the configuration file is configured to enable connection (true), the livox_ros2_driver will only connect to the device specified in the configuration file;
-
-4. When the connection status of the devices specified in the configuration file is all configured to prohibit connection (false), livox_ros2_driver will automatically connect all the devices that are scanned;
-
-5. the json configuration file is in the "ws_livox/src/livox_ros2_driver/config" directory;
+5. the json configuration file is in the `~/livox_ros2_driver/livox_ros2_driver/config` directory;
 
 ### 3.4 Livox LiDAR Broadcast code introduction
 
@@ -93,15 +101,13 @@ Each Livox LiDAR device has a unique broadcast code. The broadcast code consists
 
 &ensp;&ensp;&ensp;&ensp;![Broadcast Code](images/broadcast_code.png)
 
-&ensp;&ensp;&ensp;&ensp;***Note :***
-
-&ensp;&ensp;&ensp;&ensp;X in the figure above corresponds to 1 in MID-100_Left/MID-40/Horizon/Tele products, 2 in MID-100_Middle, and 3 in MID-100_Right.
+Note: The X in the figure above corresponds to 1 in MID-100_Left/MID-40/Horizon/Tele products, 2 in MID-100_Middle, and 3 in MID-100_Right.
 
 ## 4. Launch file and livox_ros2_driver internal parameter configuration instructions
 
 ### 4.1 Launch file configuration instructions
 
-All launch files of livox_ros2_driver are in the "ws_livox/src/livox_ros2_driver/launch" directory. Different launch files have different configuration parameter values and are used in different scenarios :
+All launch files of livox_ros2_driver are in the "~/livox_ros2_driver/launch" directory. Different launch files have different configuration parameter values and are used in different scenarios :
 
 | launch file name          | Description                                                  |
 | ------------------------- | ------------------------------------------------------------ |
@@ -114,7 +120,16 @@ All launch files of livox_ros2_driver are in the "ws_livox/src/livox_ros2_driver
 
 ### 4.2 Livox_ros2_driver internal main parameter configuration instructions
 
-All internal parameters of Livox_ros2_driver are in the launch file. Below are detailed descriptions of the three commonly used parameters :
+**IMPORTANT**
+The default values of the parameters might not be what is actually provided in this repo. In particular, `livox_lidar_msg_launch.py` and `livox_lidar_rviz_launch.py` have different values than the Livox default values. The default values in this repo are the values that we have found to work best for our use case.
+
+`multi_topic` will be an important parameter to set if you are using more than one lidar. One thing to note is that when this parameter is set to `1`, the livox will publish data to multiple topics with the format `livox/lidar{lidar_id}` (lidar_id can be found on the lidar itself). When this parameter is set to `0`, the livox will publish data to the topic named `/livox/lidar`.
+
+You would need to modify the launch files of the nodes that subscribe to the livox data to match the topic name that the livox is publishing to.
+
+If you are unsure of what topic name is being used. Simply do a `ros2 topic list` and you will see the topic name that the livox is publishing to.
+
+All internal parameters of Livox_ros2_driver are provided in the launch files. Below are detailed descriptions of the three commonly used parameters
 
 | Parameter    | Detailed description                                         | Default |
 | ------------ | ------------------------------------------------------------ | ------- |
@@ -122,9 +137,9 @@ All internal parameters of Livox_ros2_driver are in the launch file. Below are d
 | multi_topic  | If the LiDAR device has an independent topic to publish pointcloud data<br>0 -- All LiDAR devices use the same topic to publish pointcloud data<br>1 -- Each LiDAR device has its own topic to publish point cloud data | 0       |
 | xfer_format  | Set pointcloud format<br>0 -- Livox pointcloud2(PointXYZRTL) pointcloud format<br>1 -- Livox customized pointcloud format<br>2 -- Standard pointcloud2 (pcl :: PointXYZI) pointcloud format in the PCL library | 0       |
 
-&ensp;&ensp;&ensp;&ensp;***livox_ros2_driver pointcloud data detailed description :***
+### 4.3 Pointcloud data specification
 
-1. Livox pointcloud2 (PointXYZRTL) point cloud format, as follows :
+1. Livox pointcloud2 `PointXYZRTL` point cloud format, as follows :
 
 ```c
 float32 x               # X axis, unit:m
@@ -136,6 +151,7 @@ uint8 line              # laser number in lidar
 ```
 
 2. Livox customized data package format, as follows :
+*This is the one that we will be using in the perception pipeline*
 
 ```c
 Header header             # ROS standard message header
@@ -158,15 +174,13 @@ uint8 tag               # livox tag
 uint8 line              # laser number in lidar
 ```
 
-3. The standard pointcloud2 (pcl :: PointXYZI) format in the PCL library (Not currently supported) :
-
-&ensp;&ensp;&ensp;&ensp;Please refer to the pcl :: PointXYZI data structure in the point_types.hpp file of the PCL library.
+3. The standard pointcloud2 `pcl::PointXYZI` format in the PCL library is not currently supported. Please refer to the `pcl::PointXYZI` data structure in the `point_types.hpp` file of the PCL library.
 
 ## 5. Configure LiDAR parameters
 
-In the "ws_livox/src/livox_ros2_driver/launch" path, there are two json files, livox_hub_config.json and livox_lidar_config.json.
+In the "~/livox_ros2_driver/launch" path, there are two json files, `livox_hub_config.json` and `livox_lidar_config.json`.
 
-1. When connecting directly to LiDAR, use the livox_lidar_config.json file to configure LiDAR parameters. Examples of file contents are as follows :
+1. When connecting directly to LiDAR, use the `livox_lidar_config.json` file to configure LiDAR parameters. Examples of file contents are as follows :
 
 ```json
 {
@@ -196,11 +210,9 @@ LiDAR configuration parameter
 | imu_rate                   | Int     | Push frequency of IMU sensor data<br>0 -- stop push<br>1 -- 200 Hz<br>Others -- undefined, it will cause unpredictable behavior<br>Currently only Horizon supports this, MID serials do not support it | 0               |
 | extrinsic_parameter_source | Int     | Whether to enable extrinsic parameter automatic compensation<br>0 -- Disable automatic compensation of LiDAR external reference<br>1 -- Automatic compensation of LiDAR external reference | 0               |
 
-&ensp;&ensp;&ensp;&ensp;***Note :***
+**Note:** When connecting multiple LiDAR, if you want to use the external parameter automatic compensation function, you must first use the livox viewer to calibrate the external parameters and save them to LiDAR.
 
-&ensp;&ensp;&ensp;&ensp;When connecting multiple LiDAR, if you want to use the external parameter automatic compensation function, you must first use the livox viewer to calibrate the external parameters and save them to LiDAR.
-
-2. When connecting to the Hub, use livox_hub_config.json to configure the parameters of the Hub and LiDAR. Examples of file contents are as follows :
+1. When connecting to the Hub, use `livox_hub_config.json` to configure the parameters of the Hub and LiDAR. Examples of file contents are as follows :
 
 ```json
 {
@@ -219,7 +231,7 @@ LiDAR configuration parameter
 }
 ```
 
-&ensp;&ensp;&ensp;&ensp;The main difference between the content of Hub json configuration file and the content of the LiDAR json configuration file is that the Hub configuration item "hub_config" is added, and the related configuration content of the Hub is shown in the following table :
+The main difference between the content of Hub json configuration file and the content of the LiDAR json configuration file is that the Hub configuration item "hub_config" is added, and the related configuration content of the Hub is shown in the following table :
 
 HUB configuration parameter
 | Parameter      | Type    | Description                                                  | Default         |
@@ -242,13 +254,11 @@ Prepare a GPS device to ensure that the GPS can output UTC time information in G
 
 [Timestamp synchronization](https://github.com/Livox-SDK/Livox-SDK/wiki/Timestamp-Synchronization)
 
-&ensp;&ensp;&ensp;&ensp;***Note :***
+**Note:**
 
-&ensp;&ensp;&ensp;&ensp;(1) The time stamp synchronization function of livox_ros2_driver is based on the LidarSetUtcSyncTime interface of Livox-SDK, and only supports GPS synchronization, which is one of many synchronization methods of livox devices.
-
-&ensp;&ensp;&ensp;&ensp;(2) Be sure to set the output frequency of GPRMC/GNRMC time information of GPS to 1Hz, other frequencies are not recommended.
-
-&ensp;&ensp;&ensp;&ensp;(3) Examples of GPRMC/GNRMC format strings are as follows :
+1. The time stamp synchronization function of livox_ros2_driver is based on the LidarSetUtcSyncTime interface of Livox-SDK, and only supports GPS synchronization, which is one of many synchronization methods of livox devices.
+2. Be sure to set the output frequency of GPRMC/GNRMC time information of GPS to 1Hz, other frequencies are not recommended.
+3. Examples of GPRMC/GNRMC format strings are as follows :
 
 ```bash
 $GNRMC,143909.00,A,5107.0020216,N,11402.3294835,W,0.036,348.3,210307,0.0,E,A*31
@@ -275,5 +285,5 @@ Timestamp synchronization function configuration instructions
 
 You can get support from Livox with the following methods :
 
-* Send email to cs@livoxtech.com with a clear description of your problem and your setup
-* Report issue on github
+- Send email to cs@livoxtech.com with a clear description of your problem and your setup
+- Report issue on github
